@@ -46,11 +46,25 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
             self.detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? MessagesTableViewController
         }
         
-        notificationToken = conversations.addNotificationBlock({ [unowned self] results, error in
-            guard let results = results else { return }
-            
-            if results.count > 0 {
-                self.tableView.reloadData()
+        notificationToken = conversations.addNotificationBlock({ [weak self] (changes: RealmCollectionChange) in
+            switch changes {
+            case .Initial(let conversations):
+                if conversations.count > 0 {
+                    self?.tableView.reloadData()
+                }
+                break
+            case .Update(_, let deletions, let insertions, let modifications):
+                self!.tableView!.beginUpdates()
+                self!.tableView!.insertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0) },
+                    withRowAnimation: .Automatic)
+                self!.tableView!.deleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0) },
+                    withRowAnimation: .Automatic)
+                self!.tableView!.reloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0) },
+                    withRowAnimation: .Automatic)
+                self!.tableView!.endUpdates()
+                break
+            case .Error:
+                break
             }
         })
         

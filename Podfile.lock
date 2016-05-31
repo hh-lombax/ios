@@ -1,29 +1,29 @@
 PODS:
-  - Alamofire (3.2.0)
-  - AlamofireImage (2.3.1):
-    - Alamofire (~> 3.2)
-  - AlamofireNetworkActivityIndicator (1.0.0):
-    - Alamofire (~> 3.2)
+  - Alamofire (3.4.0)
+  - AlamofireImage (2.4.0):
+    - Alamofire (~> 3.3)
+  - AlamofireNetworkActivityIndicator (1.0.1):
+    - Alamofire (~> 3.3)
   - Crashlytics (3.7.0):
     - Fabric (~> 1.6.3)
   - DateTools (1.7.0)
-  - Fabric (1.6.6)
+  - Fabric (1.6.7)
   - Freddy (2.0.2)
-  - JSQMessagesViewController (7.2.0):
+  - JSQMessagesViewController (7.3.1):
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
   - JWTDecode (1.0.0)
-  - p2.OAuth2 (2.2.1):
-    - SwiftKeychain (~> 0.1.5)
-  - Realm (0.98.2):
-    - Realm/Headers (= 0.98.2)
-  - Realm/Headers (0.98.2)
-  - RealmSwift (0.98.2):
-    - Realm (= 0.98.2)
-  - SlackTextViewController (1.9)
+  - p2.OAuth2 (2.2.6):
+    - SwiftKeychain (~> 1.0)
+  - Realm (1.0.0):
+    - Realm/Headers (= 1.0.0)
+  - Realm/Headers (1.0.0)
+  - RealmSwift (1.0.0):
+    - Realm (= 1.0.0)
+  - SlackTextViewController (1.9.3)
   - SnapKit (0.15.0)
-  - StatefulViewController (1.0)
-  - SwiftKeychain (0.1.5)
+  - StatefulViewController (1.1)
+  - SwiftKeychain (1.0.0)
 
 DEPENDENCIES:
   - Alamofire (~> 3.0)
@@ -36,28 +36,30 @@ DEPENDENCIES:
   - JSQMessagesViewController
   - JWTDecode (~> 1.0)
   - p2.OAuth2 (~> 2.2.1)
-  - RealmSwift
+  - RealmSwift (~> 1.0.0)
   - SlackTextViewController (~> 1.9)
   - SnapKit (~> 0.15.0)
   - StatefulViewController (~> 1.0)
 
 SPEC CHECKSUMS:
-  Alamofire: 4da478599fccddff361205c8929333d7fe18dceb
-  AlamofireImage: e52336282757bbe1644f075d6cb85f19c891f939
-  AlamofireNetworkActivityIndicator: 34e6fe7ebb5d8df76cc55fbf83a6087ae6457344
+  Alamofire: c19a627cefd6a95f840401c49ab1f124e07f54ee
+  AlamofireImage: 87408b652e0f5ae5fe364035f15aea8b9b24c77e
+  AlamofireNetworkActivityIndicator: 49a6e39afb947136f7b1872bae2d684957c26697
   Crashlytics: c3a2333dea9e2733d2777f730910321fc9e25c0d
   DateTools: 53288ee8b905fdc75897a1e6b5cc0144b14cba60
-  Fabric: 1abc1e59f11fa39ede6f690ef7309d8563e3ec59
+  Fabric: caf7580c725e64db144f610ac65cd60956911dc7
   Freddy: e53713b8d5be02dbf5f4132c44d899d99eb09a6b
-  JSQMessagesViewController: 73cab48aa92fc2d512f3b6724f3425cc47a19eb5
+  JSQMessagesViewController: 3847120a97a7ab3bdc701f166c59f3955f7801c7
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   JWTDecode: d172edcb1607cc15aed85d58eceedcbb675a4534
-  p2.OAuth2: 7f5c44259ef83ea5b9ef8f9049310611788f86cb
-  Realm: 88a147fe04b8f07191a676b15c779b2b448991de
-  RealmSwift: 9907c7415b3e19ef2ab9f89878fc890f03f93aea
-  SlackTextViewController: d51503f7be846cb9976a273499dc90f2445e9447
+  p2.OAuth2: a89edc5660aca8a5349882ee9008de793bbbbcd0
+  Realm: e15cd8e7c11d3e576f628ba0b7cb855269b4991c
+  RealmSwift: 3229306d020d96f83b335f87a0dcbf2cef0e6a2b
+  SlackTextViewController: bd2a34c188d4f7dec93cf42388f38551263fac82
   SnapKit: 4962eed2ee18e48cbd2b2292fffc57efe7235f87
-  StatefulViewController: 2a0e5ab30d9ade8e366253fb759baa9fbf458f3e
-  SwiftKeychain: 1387edad8b56c659daa93d9ffc99526bac5b0088
+  StatefulViewController: 396f6d25676680a5c0503143cca55be23ab8c362
+  SwiftKeychain: fd9ad69f7b3ff7a0c7ba579da508bbaa89a395b2
 
-COCOAPODS: 0.39.0
+PODFILE CHECKSUM: 17b001e1d7e84db2c7562e7e646669f0c0786de3
+
+COCOAPODS: 1.0.0

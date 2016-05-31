@@ -55,8 +55,8 @@ class MessagesTableViewController: SLKTextViewController {
             make.left.equalTo(view)
         }
         
-        tableView.registerNib(UINib.init(nibName: incomingCellIdentifier, bundle: nil), forCellReuseIdentifier: incomingCellIdentifier)
-        tableView.registerNib(UINib.init(nibName: outgoingCellIdentifier, bundle: nil), forCellReuseIdentifier: outgoingCellIdentifier)
+        tableView!.registerNib(UINib.init(nibName: incomingCellIdentifier, bundle: nil), forCellReuseIdentifier: incomingCellIdentifier)
+        tableView!.registerNib(UINib.init(nibName: outgoingCellIdentifier, bundle: nil), forCellReuseIdentifier: outgoingCellIdentifier)
         
         textInputbar.backgroundColor = UIColor.backgroundColor()
         textInputbar.layoutMargins = UIEdgeInsetsZero
@@ -72,17 +72,37 @@ class MessagesTableViewController: SLKTextViewController {
         textView.dynamicTypeEnabled = false // This should stay false until messages support dynamic type.
         
         if let conversation = conversation {
-            self.notificationToken = messages.addNotificationBlock({ [unowned self] results, error in
-                guard let results = results where !results.isEmpty else { return }
-                
-                self.tableView.reloadData()
-                self.hideLoadingView()
-                
-                let newMessageIds = results.filter("isNew == true").map { $0.id }
-                
-                if !newMessageIds.isEmpty {
-                    API.sharedInstance.markMessagesAsRead(conversation.id, messageIds: newMessageIds)
+            self.notificationToken = messages.addNotificationBlock({ [weak self] (changes: RealmCollectionChange) in
+                switch changes {
+                case .Initial(let messages):
+                    if messages.count > 0 {
+                        self!.tableView!.reloadData()
+                    }
+                    break
+                case .Update(let messages, let deletions, let insertions, let modifications):
+                    let newMessageIds = messages.filter("isNew == true").map { $0.id }
+                    
+                    if !newMessageIds.isEmpty {
+                        API.sharedInstance.markMessagesAsRead(conversation.id, messageIds: newMessageIds)
+                    }
+                    
+                    self!.tableView!.beginUpdates()
+                    self!.tableView!.insertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0) },
+                        withRowAnimation: .Automatic)
+                    self!.tableView!.deleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0) },
+                        withRowAnimation: .Automatic)
+                    self!.tableView!.reloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0) },
+                        withRowAnimation: .Automatic)
+                    self!.tableView!.endUpdates()
+                    break
+                case .Error:
+                    break
                 }
+                
+//                self!.tableView!.reloadData()
+//                self!.hideLoadingView()
+                
+                
             })
         }
     }
@@ -150,7 +170,7 @@ class MessagesTableViewController: SLKTextViewController {
         
         // SlackTextViewController inverts tables in order to get the layout to work. This means that our table cells needs to
         // apply the same inversion or be upside down.
-        cell.transform = self.tableView.transform // 😬
+        cell.transform = self.tableView!.transform // 😬
         
         cell.message = message
         

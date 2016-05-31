@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		587627DD08426F8F55D1C9A2 /* Pods_FetLife.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F6F68224A55AA7980436403 /* Pods_FetLife.framework */; };
 		828D662B1CC1DD3200A6F1D2 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82329A991C656BD900DADA23 /* LoginViewController.swift */; };
 		828D662C1CC1DD3200A6F1D2 /* MessagesTableViewCellIncoming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826C5FD51C6D514F000E782B /* MessagesTableViewCellIncoming.swift */; };
 		828D662D1CC1DD3200A6F1D2 /* UIColor+FetLife.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8256F3661C63A630004253FE /* UIColor+FetLife.swift */; };
@@ -67,12 +66,12 @@
 		82B355C11CC52AC800CBDAB3 /* MessagesTableViewCellIOutgoing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826C5FDD1C6D5BBC000E782B /* MessagesTableViewCellIOutgoing.swift */; };
 		82B355C41CC52AC800CBDAB3 /* MessagesTableViewCellIncoming.xib in Resources */ = {isa = PBXBuildFile; fileRef = 826C5FD11C6D50E7000E782B /* MessagesTableViewCellIncoming.xib */; };
 		82B355C51CC52AC800CBDAB3 /* MessagesTableViewCellOutgoing.xib in Resources */ = {isa = PBXBuildFile; fileRef = 826C5FE11C6D5BDE000E782B /* MessagesTableViewCellOutgoing.xib */; };
+		C43A313B763BE0C8AB5806C5 /* Pods_FetLife.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34AF5CA6E25F57E89EA77089 /* Pods_FetLife.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		41E867F84813A83003B38D05 /* Pods-FetLife.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FetLife.release.xcconfig"; path = "Pods/Target Support Files/Pods-FetLife/Pods-FetLife.release.xcconfig"; sourceTree = "<group>"; };
-		58BD6D2F273768CECA24029F /* Pods-FetLife.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FetLife.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FetLife/Pods-FetLife.debug.xcconfig"; sourceTree = "<group>"; };
-		5F6F68224A55AA7980436403 /* Pods_FetLife.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FetLife.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		34AF5CA6E25F57E89EA77089 /* Pods_FetLife.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FetLife.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3693E20D16A2F74913915A13 /* Pods-FetLife.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FetLife.release.xcconfig"; path = "Pods/Target Support Files/Pods-FetLife/Pods-FetLife.release.xcconfig"; sourceTree = "<group>"; };
 		82016BA21C722A6600E05F10 /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 0; name = Podfile; path = ../Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		821DC66B1C626F8600B9C25E /* API.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = API.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		821DC66E1C62761C00B9C25E /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
@@ -110,7 +109,7 @@
 		82CE55731C630FF000E12101 /* Freddy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Freddy.framework; path = Carthage/Build/iOS/Freddy.framework; sourceTree = "<group>"; };
 		82F505FF1C7E57B400DDDDDF /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Models.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		82F6D1041C8DF067002DF881 /* Dispatch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Dispatch.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		B9A2A5F9B52A1C96395D32FD /* Pods_FetChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FetChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A39D0485B21C8021D8A03A96 /* Pods-FetLife.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FetLife.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FetLife/Pods-FetLife.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,7 +117,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				587627DD08426F8F55D1C9A2 /* Pods_FetLife.framework in Frameworks */,
+				C43A313B763BE0C8AB5806C5 /* Pods_FetLife.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,15 +139,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4534BD77DDAA645059BCF700 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				58BD6D2F273768CECA24029F /* Pods-FetLife.debug.xcconfig */,
-				41E867F84813A83003B38D05 /* Pods-FetLife.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 		82329A941C65256A00DADA23 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -158,8 +148,7 @@
 				82CE55731C630FF000E12101 /* Freddy.framework */,
 				821DC6711C6279EA00B9C25E /* Kingfisher.framework */,
 				821DC66E1C62761C00B9C25E /* Alamofire.framework */,
-				B9A2A5F9B52A1C96395D32FD /* Pods_FetChat.framework */,
-				5F6F68224A55AA7980436403 /* Pods_FetLife.framework */,
+				34AF5CA6E25F57E89EA77089 /* Pods_FetLife.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -223,7 +212,7 @@
 				82B55ADE1C60FB060035D45E /* FetLifeUITests */,
 				82B55ABB1C60FB060035D45E /* Products */,
 				82329A941C65256A00DADA23 /* Frameworks */,
-				4534BD77DDAA645059BCF700 /* Pods */,
+				90536D9D2F26DB38F2F3B292 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -275,6 +264,15 @@
 			path = FetLifeUITests;
 			sourceTree = "<group>";
 		};
+		90536D9D2F26DB38F2F3B292 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				A39D0485B21C8021D8A03A96 /* Pods-FetLife.debug.xcconfig */,
+				3693E20D16A2F74913915A13 /* Pods-FetLife.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -282,13 +280,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 828D664A1CC1DD3200A6F1D2 /* Build configuration list for PBXNativeTarget "FetLife" */;
 			buildPhases = (
-				828D66291CC1DD3200A6F1D2 /* Check Pods Manifest.lock */,
+				AAD5411613CD8BBB4509963A /* 📦 Check Pods Manifest.lock */,
 				828D662A1CC1DD3200A6F1D2 /* Sources */,
 				828D663B1CC1DD3200A6F1D2 /* Frameworks */,
 				828D663D1CC1DD3200A6F1D2 /* Resources */,
-				828D66471CC1DD3200A6F1D2 /* Embed Pods Frameworks */,
-				828D66481CC1DD3200A6F1D2 /* Copy Pods Resources */,
 				828D66491CC1DD3200A6F1D2 /* Setup Fabric */,
+				955FFBC68E0851EA02654394 /* 📦 Embed Pods Frameworks */,
+				36A5CBA42751A092B797FDA7 /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -398,44 +396,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		828D66291CC1DD3200A6F1D2 /* Check Pods Manifest.lock */ = {
+		36A5CBA42751A092B797FDA7 /* 📦 Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		828D66471CC1DD3200A6F1D2 /* Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-FetLife/Pods-FetLife-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		828D66481CC1DD3200A6F1D2 /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
+			name = "📦 Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -456,6 +424,36 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Fabric/run\" c024375c301ff84ebfc74878f8f19fb6ea107da2 3d881bdbd637e8b95e537047904fc664392f6fbec0c0033470a7f3e733caf5d4";
+		};
+		955FFBC68E0851EA02654394 /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-FetLife/Pods-FetLife-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AAD5411613CD8BBB4509963A /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -553,7 +551,7 @@
 /* Begin XCBuildConfiguration section */
 		828D664B1CC1DD3200A6F1D2 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 58BD6D2F273768CECA24029F /* Pods-FetLife.debug.xcconfig */;
+			baseConfigurationReference = A39D0485B21C8021D8A03A96 /* Pods-FetLife.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -575,7 +573,7 @@
 		};
 		828D664C1CC1DD3200A6F1D2 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 41E867F84813A83003B38D05 /* Pods-FetLife.release.xcconfig */;
+			baseConfigurationReference = 3693E20D16A2F74913915A13 /* Pods-FetLife.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";

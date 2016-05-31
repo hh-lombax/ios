@@ -5,6 +5,9 @@
       location = "group:README.md">
    </FileRef>
    <FileRef
+      location = "group:Swift.gitignore">
+   </FileRef>
+   <FileRef
       location = "group:FetLife.xcodeproj">
    </FileRef>
    <FileRef
