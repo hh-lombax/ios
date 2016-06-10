@@ -1,10 +1,6 @@
-## Build generated
 build/
-DerivedData/
-xcuserdata/
-
-## Various settings
-*.pbxuser
+DerivedData
+.pbxuser
 !default.pbxuser
 *.mode1v3
 !default.mode1v3
@@ -12,15 +8,13 @@ xcuserdata/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
-xcuserdata/
-
-## Other
+xcuserdata
+*.xccheckout
 *.moved-aside
 *.xcuserstate
-.build/
-
-## Obj-C/Swift specific
+*.xcscmblueprint
 *.hmap
 *.ipa
-*.dSYM.zip
-*.dSYM
+Carthage/*
+Pods/*
+.DS_Store
