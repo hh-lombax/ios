@@ -23,7 +23,7 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
         .filter("isArchived == false")
         .sorted("lastMessageCreated", ascending: false)
     
-    var notificationToken: NotificationToken?
+    var notificationToken: NotificationToken? = nil
     
     private var collapseDetailViewController = true
     
@@ -47,21 +47,23 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
         }
         
         notificationToken = conversations.addNotificationBlock({ [weak self] (changes: RealmCollectionChange) in
+            guard let tableView = self?.tableView else { return }
+            
             switch changes {
             case .Initial(let conversations):
                 if conversations.count > 0 {
-                    self?.tableView.reloadData()
+                    tableView.reloadData()
                 }
                 break
             case .Update(_, let deletions, let insertions, let modifications):
-                self!.tableView!.beginUpdates()
-                self!.tableView!.insertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0) },
+                tableView.beginUpdates()
+                tableView.insertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0) },
                     withRowAnimation: .Automatic)
-                self!.tableView!.deleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0) },
+                tableView.deleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0) },
                     withRowAnimation: .Automatic)
-                self!.tableView!.reloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0) },
+                tableView.reloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0) },
                     withRowAnimation: .Automatic)
-                self!.tableView!.endUpdates()
+                tableView.endUpdates()
                 break
             case .Error:
                 break
@@ -73,6 +75,10 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
         }
         
         self.fetchConversations()
+    }
+    
+    deinit {
+        notificationToken?.stop()
     }
     
     override func viewWillAppear(animated: Bool) {
