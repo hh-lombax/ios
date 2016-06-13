@@ -13,7 +13,7 @@ target 'FetLife' do
   pod 'SlackTextViewController', '~> 1.9'
   pod 'JWTDecode', '~> 1.0'
   pod 'SnapKit', '~> 0.15.0'
-  pod 'RealmSwift'
+  pod 'RealmSwift', '~> 1.0.0'
   pod 'Fabric'
   pod 'Crashlytics'
   pod 'JSQMessagesViewController'
