@@ -36,7 +36,7 @@ class MessagesTableViewController: SLKTextViewController {
         }
     }
     var messages: Results<Message>!
-    var notificationToken: NotificationToken?
+    var notificationToken: NotificationToken? = nil
     
     // MARK: - Lifecycle
 
@@ -72,11 +72,13 @@ class MessagesTableViewController: SLKTextViewController {
         textView.dynamicTypeEnabled = false // This should stay false until messages support dynamic type.
         
         if let conversation = conversation {
-            self.notificationToken = messages.addNotificationBlock({ [weak self] (changes: RealmCollectionChange) in
+            notificationToken = messages.addNotificationBlock({ [weak self] (changes: RealmCollectionChange) in
+                guard let tableView = self?.tableView else { return }
+                
                 switch changes {
                 case .Initial(let messages):
                     if messages.count > 0 {
-                        self!.tableView!.reloadData()
+                        tableView.reloadData()
                     }
                     break
                 case .Update(let messages, let deletions, let insertions, let modifications):
@@ -86,25 +88,25 @@ class MessagesTableViewController: SLKTextViewController {
                         API.sharedInstance.markMessagesAsRead(conversation.id, messageIds: newMessageIds)
                     }
                     
-                    self!.tableView!.beginUpdates()
-                    self!.tableView!.insertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0) },
-                        withRowAnimation: .Automatic)
-                    self!.tableView!.deleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0) },
-                        withRowAnimation: .Automatic)
-                    self!.tableView!.reloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0) },
-                        withRowAnimation: .Automatic)
-                    self!.tableView!.endUpdates()
+                    tableView.beginUpdates()
+                    tableView.insertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0) }, withRowAnimation: .Automatic)
+                    tableView.deleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0) }, withRowAnimation: .Automatic)
+                    tableView.reloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0) }, withRowAnimation: .Automatic)
+                    tableView.endUpdates()
+                    
                     break
                 case .Error:
                     break
                 }
                 
-//                self!.tableView!.reloadData()
-//                self!.hideLoadingView()
-                
-                
+                tableView.reloadData()
+                self?.hideLoadingView()
             })
         }
+    }
+    
+    deinit {
+        notificationToken?.stop()
     }
     
     override func viewDidAppear(animated: Bool) {
