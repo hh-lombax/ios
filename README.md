@@ -27,8 +27,8 @@ These instructions are written assuming you know very little about computers and
 2. Open the `Terminal` application up on your Mac.
 3. Enter the following commands into your terminal window one by one and wait for them to finish:
   - `sudo gem install cocoapods` you will be prompted for your computers password
-  - `git clone git@github.com:fetlife/fetlife-ios.git`
-  - `cd fetlife-ios`
+  - `git clone git@github.com:fetlife/ios.git`
+  - `cd ios`
   - `pod install`
   - `open FetLife.xcworkspace`
 4. Installing the app on your phone:
@@ -53,7 +53,7 @@ Want to install the app on your phone but are not technically savvy? Ask your lo
 
 ### Got Bugs?
 
-If you find a bug please start by reading through the our current list of [open issues](https://github.com/fetlife/fetlife-ios/issues) and if you can't find anything about your bug please [submit a new bug](https://github.com/fetlife/fetlife-ios/issues/new).
+If you find a bug please start by reading through the our current list of [open issues](https://github.com/fetlife/ios/issues) and if you can't find anything about your bug please [submit a new bug](https://github.com/fetlife/ios/issues/new).
 
 
 ### Want to Contribute
