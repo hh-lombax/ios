@@ -21,24 +21,24 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
     let conversations: Results<Conversation> = try! Realm()
         .objects(Conversation.self)
         .filter("isArchived == false")
-        .sorted("lastMessageCreated", ascending: false)
+        .sorted(byKeyPath: "lastMessageCreated", ascending: false)
     
     var notificationToken: NotificationToken? = nil
     
-    private var collapseDetailViewController = true
+    fileprivate var collapseDetailViewController = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupStateViews()
         
-        self.refreshControl.addTarget(self, action: #selector(ConversationsViewController.refresh(_:)), forControlEvents: UIControlEvents.ValueChanged)
+        self.refreshControl.addTarget(self, action: #selector(ConversationsViewController.refresh(_:)), for: UIControlEvents.valueChanged)
         
         self.splitViewController?.delegate = self
         
         self.tableView?.delegate = self
         self.tableView?.dataSource = self
-        self.tableView?.separatorInset = UIEdgeInsetsZero
+        self.tableView?.separatorInset = UIEdgeInsets.zero
         self.tableView?.addSubview(refreshControl)
         
         if let split = self.splitViewController {
@@ -50,22 +50,22 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
             guard let tableView = self?.tableView else { return }
             
             switch changes {
-            case .Initial(let conversations):
+            case .initial(let conversations):
                 if conversations.count > 0 {
                     tableView.reloadData()
                 }
                 break
-            case .Update(_, let deletions, let insertions, let modifications):
+            case .update(_, let deletions, let insertions, let modifications):
                 tableView.beginUpdates()
-                tableView.insertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0) },
-                    withRowAnimation: .Automatic)
-                tableView.deleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0) },
-                    withRowAnimation: .Automatic)
-                tableView.reloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0) },
-                    withRowAnimation: .Automatic)
+                tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
+                    with: .automatic)
+                tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
+                    with: .automatic)
+                tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) },
+                    with: .automatic)
                 tableView.endUpdates()
                 break
-            case .Error:
+            case .error:
                 break
             }
         })
@@ -81,27 +81,27 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
         notificationToken?.stop()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.setupInitialViewState()
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail" {
             if let indexPath = self.tableView.indexPathForSelectedRow {
-                self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
-                self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                self.tableView.deselectRow(at: indexPath, animated: true)
+                self.tableView.reloadRows(at: [indexPath], with: .automatic)
                 let conversation = conversations[indexPath.row]
-                let controller = (segue.destinationViewController as! UINavigationController).topViewController as! MessagesTableViewController
+                let controller = (segue.destination as! UINavigationController).topViewController as! MessagesTableViewController
                 controller.conversation = conversation
                 controller.navigationItem.title = conversation.member!.nickname
-                controller.navigationItem.leftBarButtonItem = self.splitViewController?.displayModeButtonItem()
+                controller.navigationItem.leftBarButtonItem = self.splitViewController?.displayModeButtonItem
                 controller.navigationItem.leftItemsSupplementBackButton = true
             }
         }
     }
 
-    func refresh(refreshControl: UIRefreshControl) {
+    func refresh(_ refreshControl: UIRefreshControl) {
         fetchConversations()
     }
     
@@ -127,10 +127,10 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
         self.errorView = ErrorView(frame: view.frame)
     }
 
-    @IBAction func logoutButtonPressed(sender: UIBarButtonItem) {
+    @IBAction func logoutButtonPressed(_ sender: UIBarButtonItem) {
         API.sharedInstance.logout()
-        navigationController?.viewControllers = [storyboard!.instantiateViewControllerWithIdentifier("loginView"), self]
-        navigationController?.popViewControllerAnimated(true)
+        navigationController?.viewControllers = [storyboard!.instantiateViewController(withIdentifier: "loginView"), self]
+        _ = navigationController?.popViewController(animated: true)
     }
 
     // MARK: - StatefulViewController
@@ -141,32 +141,32 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
     
     // MARK: - TableView Delegate & DateSource
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = "ConversationCell"
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath) as! ConversationCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! ConversationCell
         
         let conversation = conversations[indexPath.row]
         
         cell.conversation = conversation
         
-        if cell.respondsToSelector(Selector("setPreservesSuperviewLayoutMargins:")) {
-            cell.layoutMargins = UIEdgeInsetsZero
+        if cell.responds(to: #selector(setter: UIView.preservesSuperviewLayoutMargins)) {
+            cell.layoutMargins = UIEdgeInsets.zero
             cell.preservesSuperviewLayoutMargins = false
         }
         
         return cell
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return conversations.count
     }
     
-    func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         collapseDetailViewController = false
     }
     
-    func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-        let archive = UITableViewRowAction(style: .Default, title: "Archive") { action, index in
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let archive = UITableViewRowAction(style: .default, title: "Archive") { action, index in
             let conversationToArchive = self.conversations[indexPath.row]
             
             let realm = try! Realm()
@@ -185,7 +185,7 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
     
     // MARK: - SplitViewController Delegate
     
-    func splitViewController(splitViewController: UISplitViewController, collapseSecondaryViewController secondaryViewController: UIViewController, ontoPrimaryViewController primaryViewController: UIViewController) -> Bool {
+    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
         return collapseDetailViewController
     }
 }

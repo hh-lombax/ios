@@ -24,16 +24,16 @@ class ConversationCell: UITableViewCell {
     
     var conversation: Conversation? = nil {
         didSet {
-            if let conversation = self.conversation where !conversation.invalidated {
+            if let conversation = self.conversation, !conversation.isInvalidated {
                 if let member = conversation.member {
-                    self.authorAvatarImage.af_setImageWithURL(NSURL(string: member.avatarURL)!, filter: avatarImageFilter)
+                    self.authorAvatarImage.af_setImage( withURL: URL(string: member.avatarURL)!, filter: avatarImageFilter)
                     self.authorNicknameLabel.text = member.nickname
                     self.authorMetaLabel.text = member.metaLine
                 }
                 
                 self.messageTimestampLabel.text = conversation.timeAgo()
                 self.messageSummaryLabel.text = conversation.summary()
-                self.unreadMarkerView.hidden = !conversation.hasNewMessages
+                self.unreadMarkerView.isHidden = !conversation.hasNewMessages
             }
         }
     }
@@ -42,7 +42,7 @@ class ConversationCell: UITableViewCell {
         super.awakeFromNib()
         
         let selectedCellBackground = UIView()
-        selectedCellBackground.backgroundColor = UIColor.blackColor()
+        selectedCellBackground.backgroundColor = UIColor.black
         
         self.selectedBackgroundView = selectedCellBackground
         
@@ -51,6 +51,6 @@ class ConversationCell: UITableViewCell {
         self.avatarImageFilter = AspectScaledToFillSizeWithRoundedCornersFilter(size: authorAvatarImage.frame.size, radius: 3.0)
         self.authorAvatarImage.layer.cornerRadius = 3.0
         self.authorAvatarImage.layer.borderWidth = 0.5
-        self.authorAvatarImage.layer.borderColor = UIColor.borderColor().CGColor
+        self.authorAvatarImage.layer.borderColor = UIColor.borderColor().cgColor
     }
 }

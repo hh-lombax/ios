@@ -14,16 +14,16 @@ class LoadingView: UIView {
     
     lazy var stackView: UIStackView = {
         let stack = UIStackView()
-        stack.axis = .Vertical
-        stack.distribution = .FillProportionally
-        stack.alignment = .Center
+        stack.axis = .vertical
+        stack.distribution = .fillProportionally
+        stack.alignment = .center
         stack.spacing = 26.0
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
     
     lazy var activityIndicatorView: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(activityIndicatorStyle:  UIActivityIndicatorViewStyle.WhiteLarge)
+        let indicator = UIActivityIndicatorView(activityIndicatorStyle:  UIActivityIndicatorViewStyle.whiteLarge)
         indicator.startAnimating()
         return indicator
     }()
@@ -32,9 +32,9 @@ class LoadingView: UIView {
         let label = UILabel()
         label.text = "Loading…"
         label.textColor = UIColor.brownishGreyColor()
-        label.lineBreakMode = .ByWordWrapping
+        label.lineBreakMode = .byWordWrapping
         label.numberOfLines = 0
-        label.textAlignment = .Center
+        label.textAlignment = .center
         return label
     }()
     
@@ -59,16 +59,16 @@ class LoadingView: UIView {
         backgroundColor = UIColor.backgroundColor()
         translatesAutoresizingMaskIntoConstraints = false
         
-        stackView.snp_makeConstraints { make in
-            make.centerX.equalTo(snp_centerX)
+        stackView.snp.makeConstraints { make in
+            make.centerX.equalTo(snp.centerX)
             make.topMargin.equalTo(97.0)
         }
         
-        activityIndicatorView.snp_makeConstraints { make in
+        activityIndicatorView.snp.makeConstraints { make in
             make.size.equalTo(37.0)
         }
         
-        textLabel.snp_makeConstraints { make in
+        textLabel.snp.makeConstraints { make in
             make.width.lessThanOrEqualTo(248.0)
         }
     }

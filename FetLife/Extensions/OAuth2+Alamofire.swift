@@ -12,12 +12,12 @@ import Alamofire
 
 extension OAuth2 {
     public func request(
-        method: Alamofire.Method,
-        _ URLString: URLStringConvertible,
-        parameters: [String: AnyObject]? = nil,
-        encoding: Alamofire.ParameterEncoding = .URL,
+        _ method: Alamofire.HTTPMethod,
+        _ URLString: URLConvertible,
+        parameters: [String: Any]? = nil,
+        encoding: Alamofire.ParameterEncoding = URLEncoding.default,
         headers: [String: String]? = nil)
-        -> Alamofire.Request
+        -> Alamofire.DataRequest
     {
         
         var hdrs = headers ?? [:]
@@ -25,6 +25,6 @@ extension OAuth2 {
         if let token = accessToken {
             hdrs["Authorization"] = "Bearer \(token)"
         }
-        return Alamofire.request(method, URLString, parameters: parameters, encoding: encoding, headers: hdrs)
+        return Alamofire.request(URLString, method: method, parameters: parameters, encoding: encoding, headers: hdrs)
     }
 }

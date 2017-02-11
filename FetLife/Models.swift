@@ -10,7 +10,7 @@ import RealmSwift
 import Freddy
 import DateTools
 
-private let dateFormatter: NSDateFormatter = NSDateFormatter()
+private let dateFormatter: DateFormatter = DateFormatter()
 
 // MARK: - Member
 
@@ -29,10 +29,10 @@ class Member: Object, JSONDecodable {
     required convenience init(json: JSON) throws {
         self.init()
         
-        id = try json.string("id")
-        nickname = try json.string("nickname")
-        metaLine = try json.string("meta_line")
-        avatarURL = try json.string("avatar", "variants", "medium", or: defaultAvatarURL)
+        id = try json.getString(at: "id")
+        nickname = try json.getString(at: "nickname")
+        metaLine = try json.getString(at: "meta_line")
+        avatarURL = try json.getString(at: "avatar", "variants", "medium", or: defaultAvatarURL)
     }
 }
 
@@ -40,13 +40,13 @@ class Member: Object, JSONDecodable {
 
 class Conversation: Object, JSONDecodable {
     dynamic var id = ""
-    dynamic var updatedAt = NSDate()
+    dynamic var updatedAt = Date()
     dynamic var member: Member?
     dynamic var hasNewMessages = false
     dynamic var isArchived = false
     
     dynamic var lastMessageBody = ""
-    dynamic var lastMessageCreated = NSDate()
+    dynamic var lastMessageCreated = Date()
     
     override static func primaryKey() -> String? {
         return "id"
@@ -55,15 +55,15 @@ class Conversation: Object, JSONDecodable {
     required convenience init(json: JSON) throws {
         self.init()
         
-        id = try json.string("id")
-        updatedAt = try dateStringToNSDate(json.string("updated_at"))!
-        member = try json.decode("member", type: Member.self)
-        hasNewMessages = try json.bool("has_new_messages")
-        isArchived = try json.bool("is_archived")
+        id = try json.getString(at: "id")
+        updatedAt = try dateStringToNSDate(json.getString(at: "updated_at"))!
+        member = try json.decode(at: "member", type: Member.self)
+        hasNewMessages = try json.getBool(at: "has_new_messages")
+        isArchived = try json.getBool(at: "is_archived")
         
         if let lastMessage = json["last_message"] {
-            lastMessageBody = try decodeHTML(lastMessage.string("body"))
-            lastMessageCreated = try dateStringToNSDate(lastMessage.string("created_at"))!
+            lastMessageBody = try decodeHTML(lastMessage.getString(at: "body"))
+            lastMessageCreated = try dateStringToNSDate(lastMessage.getString(at: "created_at"))!
         }
     }
     
@@ -72,7 +72,7 @@ class Conversation: Object, JSONDecodable {
     }
     
     func timeAgo() -> String {
-        return lastMessageCreated.shortTimeAgoSinceNow()
+        return (lastMessageCreated as NSDate).shortTimeAgoSinceNow()
     }
 
 }
@@ -82,7 +82,7 @@ class Conversation: Object, JSONDecodable {
 class Message: Object {
     dynamic var id = ""
     dynamic var body = ""
-    dynamic var createdAt = NSDate()
+    dynamic var createdAt = Date()
     dynamic var memberId = ""
     dynamic var memberNickname = ""
     dynamic var isNew = false
@@ -96,30 +96,30 @@ class Message: Object {
     required convenience init(json: JSON) throws {
         self.init()
         
-        id = try json.string("id")
-        body = try decodeHTML(json.string("body"))
-        createdAt = try dateStringToNSDate(json.string("created_at"))!
-        memberId = try json.string("member", "id")
-        memberNickname = try json.string ("member", "nickname")
-        isNew = try json.bool("is_new")
+        id = try json.getString(at: "id")
+        body = try decodeHTML(json.getString(at: "body"))
+        createdAt = try dateStringToNSDate(json.getString(at: "created_at"))!
+        memberId = try json.getString(at: "member", "id")
+        memberNickname = try json.getString(at: "member", "nickname")
+        isNew = try json.getBool(at: "is_new")
     }
 }
 
 // MARK: - Util
 
 // Convert from a JSON format datastring to an NSDate instance.
-private func dateStringToNSDate(jsonString: String!) -> NSDate? {
+private func dateStringToNSDate(_ jsonString: String!) -> Date? {
     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-    return dateFormatter.dateFromString(jsonString)
+    return dateFormatter.date(from: jsonString)
 }
 
 // Decode html encoded strings. Not recommended to be used at runtime as this this is heavyweight,
 // the output should be precomputed and cached.
-private func decodeHTML(htmlEncodedString: String) -> String {
-    let encodedData = htmlEncodedString.dataUsingEncoding(NSUTF8StringEncoding)!
+private func decodeHTML(_ htmlEncodedString: String) -> String {
+    let encodedData = htmlEncodedString.data(using: String.Encoding.utf8)!
     let attributedOptions : [String: AnyObject] = [
-        NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
-        NSCharacterEncodingDocumentAttribute: NSUTF8StringEncoding
+        NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType as AnyObject,
+        NSCharacterEncodingDocumentAttribute: NSNumber(value: String.Encoding.utf8.rawValue) as AnyObject
     ]
     
     var attributedString:NSAttributedString?
