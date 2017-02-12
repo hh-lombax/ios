@@ -9,48 +9,47 @@
 import Foundation
 
 typealias ExecutionBlock = () -> Void
-typealias DispatchQueue = dispatch_queue_t
 
 struct Dispatch {
-    static func asyncOnMainQueue(asyncBlock: ExecutionBlock) {
+    static func asyncOnMainQueue(asyncBlock: @escaping ExecutionBlock) {
         executeAsynchronously(Queue.main, closure: asyncBlock)
     }
     
-    static func asyncOnUserInitiatedQueue(asyncBlock: ExecutionBlock) {
+    static func asyncOnUserInitiatedQueue(asyncBlock: @escaping ExecutionBlock) {
         executeAsynchronously(Queue.userInitiated, closure: asyncBlock)
     }
     
-    static func asyncOnUtilityQueue(asyncBlock: ExecutionBlock) {
+    static func asyncOnUtilityQueue(asyncBlock: @escaping ExecutionBlock) {
         executeAsynchronously(Queue.utility, closure: asyncBlock)
     }
     
-    static func asyncOnBackgroundQueue(asyncBlock: ExecutionBlock) {
+    static func asyncOnBackgroundQueue(asyncBlock: @escaping ExecutionBlock) {
         executeAsynchronously(Queue.background, closure: asyncBlock)
     }
     
-    static func executeAsynchronously(serviceQueue: DispatchQueue, closure: ExecutionBlock) {
-        dispatch_async(serviceQueue, closure)
+    static func executeAsynchronously(_ serviceQueue: DispatchQueue, closure: @escaping ExecutionBlock) {
+        serviceQueue.async(execute: closure)
     }
     
     struct Queue {
         static var main: DispatchQueue {
-            return dispatch_get_main_queue()
+            return DispatchQueue.main
         }
         
         static var userInitiated: DispatchQueue {
-            return getGlobalQueueById(qosLevel: QOS_CLASS_USER_INITIATED)
+            return getGlobalQueueById(qosLevel: DispatchQoS.userInitiated)
         }
         
         static var utility: DispatchQueue {
-            return getGlobalQueueById(qosLevel: QOS_CLASS_UTILITY)
+            return getGlobalQueueById(qosLevel: DispatchQoS.utility)
         }
         
         static var background: DispatchQueue {
-            return getGlobalQueueById(qosLevel: QOS_CLASS_BACKGROUND)
+            return getGlobalQueueById(qosLevel: DispatchQoS.background)
         }
         
-        static func getGlobalQueueById(qosLevel id: qos_class_t, flags: UInt = 0) -> DispatchQueue {
-            return dispatch_get_global_queue(id, flags)
+        static func getGlobalQueueById(qosLevel id: DispatchQoS) -> DispatchQueue {
+            return DispatchQueue.global(qos: id.qosClass)
         }
     }
 }

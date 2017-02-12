@@ -23,7 +23,7 @@ class MessagesTableViewController: SLKTextViewController {
         let lv = LoadingView(frame: self.view.frame)
         
         if self.messages != nil && !self.messages.isEmpty {
-            lv.hidden = true
+            lv.isHidden = true
             lv.alpha = 0
         }
         
@@ -32,7 +32,7 @@ class MessagesTableViewController: SLKTextViewController {
     
     var conversation: Conversation! {
         didSet {
-            self.messages = try! Realm().objects(Message).filter("conversationId == %@", self.conversation.id).sorted("createdAt", ascending: false)
+            self.messages = try! Realm().objects(Message.self).filter("conversationId == %@", self.conversation.id).sorted(byKeyPath: "createdAt", ascending: false)
         }
     }
     var messages: Results<Message>!
@@ -45,7 +45,7 @@ class MessagesTableViewController: SLKTextViewController {
         
         view.addSubview(loadingView)
         
-        loadingView.snp_makeConstraints { make in
+        loadingView.snp.makeConstraints { make in
             if let navigationController = navigationController {
                 make.top.equalTo(view).offset(navigationController.navigationBar.frame.height)
             }
@@ -55,47 +55,47 @@ class MessagesTableViewController: SLKTextViewController {
             make.left.equalTo(view)
         }
         
-        tableView!.registerNib(UINib.init(nibName: incomingCellIdentifier, bundle: nil), forCellReuseIdentifier: incomingCellIdentifier)
-        tableView!.registerNib(UINib.init(nibName: outgoingCellIdentifier, bundle: nil), forCellReuseIdentifier: outgoingCellIdentifier)
+        tableView!.register(UINib.init(nibName: incomingCellIdentifier, bundle: nil), forCellReuseIdentifier: incomingCellIdentifier)
+        tableView!.register(UINib.init(nibName: outgoingCellIdentifier, bundle: nil), forCellReuseIdentifier: outgoingCellIdentifier)
         
         textInputbar.backgroundColor = UIColor.backgroundColor()
-        textInputbar.layoutMargins = UIEdgeInsetsZero
+        textInputbar.layoutMargins = UIEdgeInsets.zero
         textInputbar.autoHideRightButton = true
         textInputbar.tintColor = UIColor.brickColor()
         
         textView.placeholder = "What say you?"
-        textView.placeholderColor = UIColor.lightTextColor()
+        textView.placeholderColor = UIColor.lightText
         textView.backgroundColor = UIColor.backgroundColor()
-        textView.textColor = UIColor.whiteColor()
+        textView.textColor = UIColor.white
         textView.layer.borderWidth = 0.0
         textView.layer.cornerRadius = 2.0
-        textView.dynamicTypeEnabled = false // This should stay false until messages support dynamic type.
+        textView.isDynamicTypeEnabled = false // This should stay false until messages support dynamic type.
         
         if let conversation = conversation {
             notificationToken = messages.addNotificationBlock({ [weak self] (changes: RealmCollectionChange) in
                 guard let tableView = self?.tableView else { return }
                 
                 switch changes {
-                case .Initial(let messages):
+                case .initial(let messages):
                     if messages.count > 0 {
                         tableView.reloadData()
                     }
                     break
-                case .Update(let messages, let deletions, let insertions, let modifications):
+                case .update(let messages, let deletions, let insertions, let modifications):
                     let newMessageIds = messages.filter("isNew == true").map { $0.id }
                     
                     if !newMessageIds.isEmpty {
-                        API.sharedInstance.markMessagesAsRead(conversation.id, messageIds: newMessageIds)
+                        API.sharedInstance.markMessagesAsRead(conversation.id, messageIds: Array(newMessageIds))
                     }
                     
                     tableView.beginUpdates()
-                    tableView.insertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0) }, withRowAnimation: .Automatic)
-                    tableView.deleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0) }, withRowAnimation: .Automatic)
-                    tableView.reloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0) }, withRowAnimation: .Automatic)
+                    tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                    tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) }, with: .automatic)
+                    tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) }, with: .automatic)
                     tableView.endUpdates()
                     
                     break
-                case .Error:
+                case .error:
                     break
                 }
                 
@@ -109,7 +109,7 @@ class MessagesTableViewController: SLKTextViewController {
         notificationToken?.stop()
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.fetchMessages()
     }
@@ -120,7 +120,7 @@ class MessagesTableViewController: SLKTextViewController {
     
     // MARK: - Actions
     
-    @IBAction func refreshAction(sender: UIBarButtonItem) {
+    @IBAction func refreshAction(_ sender: UIBarButtonItem) {
         dismissKeyboard(true)
         showLoadingView()
         fetchMessages()
@@ -128,11 +128,11 @@ class MessagesTableViewController: SLKTextViewController {
     
     // MARK: - SlackTextViewController
     
-    func tableViewStyleForCoder(decoder: NSCoder) -> UITableViewStyle {
-        return UITableViewStyle.Plain
+    func tableViewStyleForCoder(_ decoder: NSCoder) -> UITableViewStyle {
+        return UITableViewStyle.plain
     }
     
-    override func didPressRightButton(sender: AnyObject!) {
+    override func didPressRightButton(_ sender: Any!) {
         textView.refreshFirstResponder()
         
         if let text = self.textView.text {
@@ -147,28 +147,28 @@ class MessagesTableViewController: SLKTextViewController {
     }
     
     override func keyForTextCaching() -> String? {
-        return NSBundle.mainBundle().bundleIdentifier
+        return Bundle.main.bundleIdentifier
     }
     
     // MARK: - TableView Delegate & DataSource
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in: UITableView) -> Int {
         return 1
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let messages = messages else { return 0 }
         return messages.count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
         
         // Decide whether a conversation table cell should be incoming (left) or outgoing (right).
         let cellIdent = (message.memberId != conversation.member!.id) ? self.outgoingCellIdentifier : self.incomingCellIdentifier
         
         // Get a cell, and coerce into a base class.
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellIdent, forIndexPath: indexPath) as! BaseMessagesTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdent, for: indexPath) as! BaseMessagesTableViewCell
         
         // SlackTextViewController inverts tables in order to get the layout to work. This means that our table cells needs to
         // apply the same inversion or be upside down.
@@ -177,8 +177,8 @@ class MessagesTableViewController: SLKTextViewController {
         cell.message = message
         
         // Remove margins from the table cell.
-        if cell.respondsToSelector(Selector("setPreservesSuperviewLayoutMargins:")) {
-            cell.layoutMargins = UIEdgeInsetsZero
+        if cell.responds(to: #selector(setter: UIView.preservesSuperviewLayoutMargins)) {
+            cell.layoutMargins = UIEdgeInsets.zero
             cell.preservesSuperviewLayoutMargins = false
         }
         
@@ -188,14 +188,14 @@ class MessagesTableViewController: SLKTextViewController {
         return cell
     }
     
-    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let cell = cell as! BaseMessagesTableViewCell
         
         // Round that cell.
         cell.messageContainerView.layer.cornerRadius = 3.0
     }
     
-    override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
     }
     
@@ -206,7 +206,7 @@ class MessagesTableViewController: SLKTextViewController {
             let conversationId = conversation.id
             
             if let lastMessage = messages.first {
-                let parameters: Dictionary<String, AnyObject> = [
+                let parameters: Dictionary<String, Any> = [
                     "since": Int(lastMessage.createdAt.timeIntervalSince1970),
                     "since_id": lastMessage.id
                 ]
@@ -227,23 +227,23 @@ class MessagesTableViewController: SLKTextViewController {
     }
     
     func showLoadingView() {
-        UIView.animateWithDuration(0.3,
+        UIView.animate(withDuration: 0.3,
             animations: { () -> Void in
                 self.loadingView.alpha = 1
             },
             completion: { finished  in
-                self.loadingView.hidden = false
+                self.loadingView.isHidden = false
             }
         )
     }
     
     func hideLoadingView() {
-        UIView.animateWithDuration(0.3,
+        UIView.animate(withDuration: 0.3,
             animations: { () -> Void in
                 self.loadingView.alpha = 0
             },
             completion: { finished in
-                self.loadingView.hidden = true
+                self.loadingView.isHidden = true
             }
         )
     }

@@ -39,17 +39,17 @@ final class API {
         return sharedInstance.memberNickname
     }
     
-    class func authorizeInContext(context: AnyObject, onAuthorize: ((parameters: OAuth2JSON) -> Void)?, onFailure: ((error: ErrorType?) -> Void)?) {
+    class func authorizeInContext(_ context: AnyObject, onAuthorize: @escaping (_ parameters: OAuth2JSON?, _ error: Error?) -> Void) {
         guard isAuthorized() else {
-            sharedInstance.oauthSession.onAuthorize = onAuthorize
-            sharedInstance.oauthSession.onFailure = onFailure
-            sharedInstance.oauthSession.authorizeEmbeddedFrom(context)
+//            sharedInstance.oauthSession.authorize(callback: onAuthorize)
+//            sharedInstance.oauthSession.failure(callback: onFailure)
+            sharedInstance.oauthSession.authorizeEmbedded(from: context, callback: onAuthorize)
             return
         }
     }
     
-    private init() {
-        let info = NSBundle.mainBundle().infoDictionary!
+    fileprivate init() {
+        let info = Bundle.main.infoDictionary!
         
         self.baseURL = info["FETAPI_BASE_URL"] as! String
         
@@ -70,9 +70,9 @@ final class API {
         
         if let accessToken = oauthSession.accessToken {
             do {
-                let jwt = try decode(accessToken)
+                let jwt = try decode(jwt: accessToken)
                 
-                if let userDictionary = jwt.body["user"] as? Dictionary<String, AnyObject> {
+                if let userDictionary = jwt.body["user"] as? Dictionary<String, Any> {
                     self.memberId = userDictionary["id"] as? String
                     self.memberNickname = userDictionary["nick"] as? String
                 }
@@ -86,18 +86,18 @@ final class API {
         return oauthSession.hasUnexpiredAccessToken()
     }
     
-    func loadConversations(completion: ((error: ErrorType?) -> Void)?) {
-        let parameters = ["limit": 100, "order": "-updated_at", "with_archived": true]
+    func loadConversations(_ completion: ((_ error: Error?) -> Void)?) {
+        let parameters = ["limit": 100, "order": "-updated_at", "with_archived": true] as [String : Any]
         let url = "\(baseURL)/v2/me/conversations"
         
-        oauthSession.request(.GET, url, parameters: parameters).responseData { response -> Void in
+        oauthSession.request(.get, url, parameters: parameters).responseData { response -> Void in
             switch response.result {
-            case .Success(let value):
+            case .success(let value):
                 do {
-                    let json = try JSON(data: value).array()
+                    let json = try JSON(data: value).getArray()
                     
                     if json.isEmpty {
-                        completion?(error: nil)
+                        completion?(nil)
                         return
                     }
                     
@@ -112,23 +112,23 @@ final class API {
                     
                     try! realm.commitWrite()
                     
-                    completion?(error: nil)
+                    completion?(nil)
                 } catch(let error) {
-                    completion?(error: error)
+                    completion?(error)
                 }
-            case .Failure(let error):
-                completion?(error: error)
+            case .failure(let error):
+                completion?(error)
             }
         }
     }
     
-    func archiveConversation(conversationId: String, completion: ((error: ErrorType?) -> Void)?) {
+    func archiveConversation(_ conversationId: String, completion: ((_ error: Error?) -> Void)?) {
         let parameters = ["is_archived": true]
         let url = "\(baseURL)/v2/me/conversations/\(conversationId)"
         
-        oauthSession.request(.PUT, url, parameters: parameters).responseData { response -> Void in
+        oauthSession.request(.put, url, parameters: parameters).responseData { response -> Void in
             switch response.result {
-            case .Success(let value):
+            case .success(let value):
                 do {
                     let json = try JSON(data: value)
                     
@@ -140,33 +140,33 @@ final class API {
                         realm.add(conversation, update: true)
                     }
                     
-                    completion?(error: nil)
+                    completion?(nil)
                 } catch(let error) {
-                    completion?(error: error)
+                    completion?(error)
                 }
-            case .Failure(let error):
-                completion?(error: error)
+            case .failure(let error):
+                completion?(error)
             }
         }
     }
 
     
-    func loadMessages(conversationId: String, parameters extraParameters: Dictionary<String, AnyObject> = [:], completion: ((error: ErrorType?) -> Void)?) {
+    func loadMessages(_ conversationId: String, parameters extraParameters: Dictionary<String, Any> = [:], completion: ((_ error: Error?) -> Void)?) {
         let url = "\(baseURL)/v2/me/conversations/\(conversationId)/messages"
-        var parameters: Dictionary<String, AnyObject> = ["limit": 50]
+        var parameters: Dictionary<String, Any> = ["limit": 50 as Any]
 
         for (k, v) in extraParameters {
             parameters.updateValue(v, forKey: k)
         }
         
-        oauthSession.request(.GET, url, parameters: parameters).responseData { response in
+        oauthSession.request(.get, url, parameters: parameters).responseData { response in
             switch response.result {
-            case .Success(let value):
+            case .success(let value):
                 do {
-                    let json = try JSON(data: value).array()
+                    let json = try JSON(data: value).getArray()
                     
                     if json.isEmpty {
-                        completion?(error: nil)
+                        completion?(nil)
                         return
                     }
                     
@@ -182,29 +182,29 @@ final class API {
                     
                     try! realm.commitWrite()
                     
-                    completion?(error: nil)
+                    completion?(nil)
                 } catch(let error) {
-                    completion?(error: error)
+                    completion?(error)
                 }
-            case .Failure(let error):
-                completion?(error: error)
+            case .failure(let error):
+                completion?(error)
             }
         }
     }
     
-    func createAndSendMessage(conversationId: String, messageBody: String) {
+    func createAndSendMessage(_ conversationId: String, messageBody: String) {
         let parameters = ["body": messageBody]
         let url = "\(baseURL)/v2/me/conversations/\(conversationId)/messages"
         
-        oauthSession.request(.POST, url, parameters: parameters).responseData { response in
+        oauthSession.request(.post, url, parameters: parameters).responseData { response in
             switch response.result {
-            case .Success(let value):
+            case .success(let value):
                 do {
                     let json = try JSON(data: value)
                     
                     let realm = try! Realm()
                     
-                    let conversation = realm.objectForPrimaryKey(Conversation.self, key: conversationId)
+                    let conversation = realm.object(ofType: Conversation.self, forPrimaryKey: conversationId as AnyObject)
                     let message = try Message(json: json)
                     
                     message.conversationId = conversationId
@@ -218,27 +218,27 @@ final class API {
                 } catch(let error) {
                     print(error)
                 }
-            case .Failure(let error):
+            case .failure(let error):
                 print(error)
             }
         }
     }
     
-    func markMessagesAsRead(conversationId: String, messageIds: [String]) {
+    func markMessagesAsRead(_ conversationId: String, messageIds: [String]) {
         let parameters = ["ids": messageIds]
         let url = "\(baseURL)/v2/me/conversations/\(conversationId)/messages/read"
         
-        oauthSession.request(.PUT, url, parameters: parameters).responseData { response in
+        oauthSession.request(.put, url, parameters: parameters).responseData { response in
             switch response.result {
-            case .Success:
+            case .success:
                 let realm = try! Realm()
                 
-                let conversation = realm.objectForPrimaryKey(Conversation.self, key: conversationId)
+                let conversation = realm.object(ofType: Conversation.self, forPrimaryKey: conversationId as AnyObject)
                 
                 try! realm.write {
                     conversation?.hasNewMessages = false
                 }
-            case .Failure(let error):
+            case .failure(let error):
                 print(error)
             }
         }
@@ -249,205 +249,205 @@ final class API {
      */
     func logout() {
         oauthSession.forgetTokens();
-        let storage = NSHTTPCookieStorage.sharedHTTPCookieStorage()
+        let storage = HTTPCookieStorage.shared
         storage.cookies?.forEach() { storage.deleteCookie($0) }
     }
     
     // Extremely useful for making app store screenshots, keeping this around for now.
     func fakeConversations() -> JSON {
-        return JSON.Array([
+        return JSON.array([
             
-            .Dictionary([ // 1
-                "id": .String("fake-convo-1"),
-                "updated_at": .String("2016-03-11T02:29:27.000Z"),
-                "member": .Dictionary([
-                    "id": .String("fake-member-1"),
-                    "nickname": .String("JohnBaku"),
-                    "meta_line": .String("38M Dom"),
-                    "avatar": .Dictionary([
+            .dictionary([ // 1
+                "id": .string("fake-convo-1"),
+                "updated_at": .string("2016-03-11T02:29:27.000Z"),
+                "member": .dictionary([
+                    "id": .string("fake-member-1"),
+                    "nickname": .string("JohnBaku"),
+                    "meta_line": .string("38M Dom"),
+                    "avatar": .dictionary([
                         "status": "sfw",
-                        "variants": .Dictionary(["medium": "https://flpics0.a.ssl.fastly.net/0/1/0005031f-846f-5022-a440-3bf29e0a649e_110.jpg"])
+                        "variants": .dictionary(["medium": "https://flpics0.a.ssl.fastly.net/0/1/0005031f-846f-5022-a440-3bf29e0a649e_110.jpg"])
                     ])
                 ]),
-                "has_new_messages": .Bool(true),
-                "is_archived": .Bool(false),
-                "last_message": .Dictionary([
-                    "created_at": .String("2016-03-11T02:29:27.000Z"),
-                    "body": .String("Welcome?! Welcome!"),
-                    "member": .Dictionary([
-                        "id": .String("fake-member-1"),
-                        "nickname": .String("JohnBaku"),
+                "has_new_messages": .bool(true),
+                "is_archived": .bool(false),
+                "last_message": .dictionary([
+                    "created_at": .string("2016-03-11T02:29:27.000Z"),
+                    "body": .string("Welcome?! Welcome!"),
+                    "member": .dictionary([
+                        "id": .string("fake-member-1"),
+                        "nickname": .string("JohnBaku"),
                     ])
                 ])
             ]),
             
-            .Dictionary([ // 2
-                "id": .String("fake-convo-2"),
-                "updated_at": .String("2016-03-11T02:22:27.000Z"),
-                "member": .Dictionary([
-                    "id": .String("fake-member-2"),
-                    "nickname": .String("phoenix_flame"),
-                    "meta_line": .String("24F Undecided"),
-                    "avatar": .Dictionary([
+            .dictionary([ // 2
+                "id": .string("fake-convo-2"),
+                "updated_at": .string("2016-03-11T02:22:27.000Z"),
+                "member": .dictionary([
+                    "id": .string("fake-member-2"),
+                    "nickname": .string("phoenix_flame"),
+                    "meta_line": .string("24F Undecided"),
+                    "avatar": .dictionary([
                         "status": "sfw",
-                        "variants": .Dictionary(["medium": "https://flpics2.a.ssl.fastly.net/729/729713/00051c06-0754-8b77-802c-c87e9632d126_110.jpg"])
+                        "variants": .dictionary(["medium": "https://flpics2.a.ssl.fastly.net/729/729713/00051c06-0754-8b77-802c-c87e9632d126_110.jpg"])
                     ])
                 ]),
-                "has_new_messages": .Bool(false),
-                "is_archived": .Bool(false),
-                "last_message": .Dictionary([
-                    "created_at": .String("2016-03-11T02:22:27.000Z"),
-                    "body": .String("Miss you!"),
-                    "member": .Dictionary([
-                        "id": .String("fake-member-2"),
-                        "nickname": .String("phoenix_flame"),
+                "has_new_messages": .bool(false),
+                "is_archived": .bool(false),
+                "last_message": .dictionary([
+                    "created_at": .string("2016-03-11T02:22:27.000Z"),
+                    "body": .string("Miss you!"),
+                    "member": .dictionary([
+                        "id": .string("fake-member-2"),
+                        "nickname": .string("phoenix_flame"),
                     ])
                 ])
             ]),
             
-            .Dictionary([ // 3
-                "id": .String("fake-convo-3"),
-                "updated_at": .String("2016-03-11T00:59:27.000Z"),
-                "member": .Dictionary([
-                    "id": .String("fake-member-3"),
-                    "nickname": .String("_jose_"),
-                    "meta_line": .String("28M Evolving"),
-                    "avatar": .Dictionary([
+            .dictionary([ // 3
+                "id": .string("fake-convo-3"),
+                "updated_at": .string("2016-03-11T00:59:27.000Z"),
+                "member": .dictionary([
+                    "id": .string("fake-member-3"),
+                    "nickname": .string("_jose_"),
+                    "meta_line": .string("28M Evolving"),
+                    "avatar": .dictionary([
                         "status": "sfw",
-                        "variants": .Dictionary(["medium": "https://flpics0.a.ssl.fastly.net/1568/1568309/0004c1d4-637c-8930-0e97-acf588a65176_110.jpg"])
+                        "variants": .dictionary(["medium": "https://flpics0.a.ssl.fastly.net/1568/1568309/0004c1d4-637c-8930-0e97-acf588a65176_110.jpg"])
                     ])
                 ]),
-                "has_new_messages": .Bool(false),
-                "is_archived": .Bool(false),
-                "last_message": .Dictionary([
-                    "created_at": .String("2016-03-11T00:59:27.000Z"),
-                    "body": .String("I'm so glad :)"),
-                    "member": .Dictionary([
-                        "id": .String("fake-member-3"),
-                        "nickname": .String("_jose_"),
+                "has_new_messages": .bool(false),
+                "is_archived": .bool(false),
+                "last_message": .dictionary([
+                    "created_at": .string("2016-03-11T00:59:27.000Z"),
+                    "body": .string("I'm so glad :)"),
+                    "member": .dictionary([
+                        "id": .string("fake-member-3"),
+                        "nickname": .string("_jose_"),
                     ])
                 ])
             ]),
             
-            .Dictionary([ // 4
-                "id": .String("fake-convo-4"),
-                "updated_at": .String("2016-03-11T00:22:27.000Z"),
-                "member": .Dictionary([
-                    "id": .String("fake-member-4"),
-                    "nickname": .String("meowtacos"),
-                    "meta_line": .String("24GF kitten"),
-                    "avatar": .Dictionary([
+            .dictionary([ // 4
+                "id": .string("fake-convo-4"),
+                "updated_at": .string("2016-03-11T00:22:27.000Z"),
+                "member": .dictionary([
+                    "id": .string("fake-member-4"),
+                    "nickname": .string("meowtacos"),
+                    "meta_line": .string("24GF kitten"),
+                    "avatar": .dictionary([
                         "status": "sfw",
-                        "variants": .Dictionary(["medium": "https://flpics1.a.ssl.fastly.net/3215/3215981/0005221b-36b5-8f8d-693b-4d695b78c947_110.jpg"])
+                        "variants": .dictionary(["medium": "https://flpics1.a.ssl.fastly.net/3215/3215981/0005221b-36b5-8f8d-693b-4d695b78c947_110.jpg"])
                     ])
                 ]),
-                "has_new_messages": .Bool(false),
-                "is_archived": .Bool(false),
-                "last_message": .Dictionary([
-                    "created_at": .String("2016-03-11T00:22:27.000Z"),
-                    "body": .String("That's awesome!"),
-                    "member": .Dictionary([
-                        "id": .String("fake-member-4"),
-                        "nickname": .String("meowtacos"),
+                "has_new_messages": .bool(false),
+                "is_archived": .bool(false),
+                "last_message": .dictionary([
+                    "created_at": .string("2016-03-11T00:22:27.000Z"),
+                    "body": .string("That's awesome!"),
+                    "member": .dictionary([
+                        "id": .string("fake-member-4"),
+                        "nickname": .string("meowtacos"),
                     ])
                 ])
             ]),
             
             
             
-            .Dictionary([ // 5
-                "id": .String("fake-convo-5"),
-                "updated_at": .String("2016-03-10T20:41:27.000Z"),
-                "member": .Dictionary([
-                    "id": .String("fake-member-5"),
-                    "nickname": .String("hashtagbrazil"),
-                    "meta_line": .String("30M Kinkster"),
-                    "avatar": .Dictionary([
+            .dictionary([ // 5
+                "id": .string("fake-convo-5"),
+                "updated_at": .string("2016-03-10T20:41:27.000Z"),
+                "member": .dictionary([
+                    "id": .string("fake-member-5"),
+                    "nickname": .string("hashtagbrazil"),
+                    "meta_line": .string("30M Kinkster"),
+                    "avatar": .dictionary([
                         "status": "sfw",
-                        "variants": .Dictionary(["medium": "https://flpics1.a.ssl.fastly.net/4634/4634686/000524af-28b0-c73d-d811-d67ae1b93019_110.jpg"])
+                        "variants": .dictionary(["medium": "https://flpics1.a.ssl.fastly.net/4634/4634686/000524af-28b0-c73d-d811-d67ae1b93019_110.jpg"])
                         
                     ])
                 ]),
-                "has_new_messages": .Bool(false),
-                "is_archived": .Bool(false),
-                "last_message": .Dictionary([
-                    "created_at": .String("2016-03-10T20:41:27.000Z"),
-                    "body": .String("I love that design"),
-                    "member": .Dictionary([
-                        "id": .String("fake-member-5"),
-                        "nickname": .String("hashtagbrazil"),
+                "has_new_messages": .bool(false),
+                "is_archived": .bool(false),
+                "last_message": .dictionary([
+                    "created_at": .string("2016-03-10T20:41:27.000Z"),
+                    "body": .string("I love that design"),
+                    "member": .dictionary([
+                        "id": .string("fake-member-5"),
+                        "nickname": .string("hashtagbrazil"),
                     ])
                 ])
             ]),
             
-            .Dictionary([ // 6
-                "id": .String("fake-convo-6"),
-                "updated_at": .String("2016-03-10T01:10:27.000Z"),
-                "member": .Dictionary([
-                    "id": .String("fake-member-6"),
-                    "nickname": .String("BobRegular"),
-                    "meta_line": .String("95GF"),
-                    "avatar": .Dictionary([
+            .dictionary([ // 6
+                "id": .string("fake-convo-6"),
+                "updated_at": .string("2016-03-10T01:10:27.000Z"),
+                "member": .dictionary([
+                    "id": .string("fake-member-6"),
+                    "nickname": .string("BobRegular"),
+                    "meta_line": .string("95GF"),
+                    "avatar": .dictionary([
                         "status": "sfw",
-                        "variants": .Dictionary(["medium": "https://flpics1.a.ssl.fastly.net/978/978206/0004df12-b6be-f3c3-0ec5-b34d357957a3_110.jpg"])
+                        "variants": .dictionary(["medium": "https://flpics1.a.ssl.fastly.net/978/978206/0004df12-b6be-f3c3-0ec5-b34d357957a3_110.jpg"])
                     ])
                 ]),
-                "has_new_messages": .Bool(false),
-                "is_archived": .Bool(false),
-                "last_message": .Dictionary([
-                    "created_at": .String("2016-03-10T01:10:27.000Z"),
-                    "body": .String("Yes"),
-                    "member": .Dictionary([
-                        "id": .String("fake-member-6"),
-                        "nickname": .String("BobRegular"),
+                "has_new_messages": .bool(false),
+                "is_archived": .bool(false),
+                "last_message": .dictionary([
+                    "created_at": .string("2016-03-10T01:10:27.000Z"),
+                    "body": .string("Yes"),
+                    "member": .dictionary([
+                        "id": .string("fake-member-6"),
+                        "nickname": .string("BobRegular"),
                     ])
                 ])
             ]),
             
-            .Dictionary([ // 7
-                "id": .String("fake-convo-7"),
-                "updated_at": .String("2016-03-08T01:22:27.000Z"),
-                "member": .Dictionary([
-                    "id": .String("fake-member-7"),
-                    "nickname": .String("GothRabbit"),
-                    "meta_line": .String("24 Brat"),
-                    "avatar": .Dictionary([
+            .dictionary([ // 7
+                "id": .string("fake-convo-7"),
+                "updated_at": .string("2016-03-08T01:22:27.000Z"),
+                "member": .dictionary([
+                    "id": .string("fake-member-7"),
+                    "nickname": .string("GothRabbit"),
+                    "meta_line": .string("24 Brat"),
+                    "avatar": .dictionary([
                         "status": "sfw",
-                        "variants": .Dictionary(["medium": "https://flpics2.a.ssl.fastly.net/4625/4625410/00052da5-9c1a-df4c-f3bd-530f944def18_110.jpg"])
+                        "variants": .dictionary(["medium": "https://flpics2.a.ssl.fastly.net/4625/4625410/00052da5-9c1a-df4c-f3bd-530f944def18_110.jpg"])
                     ])
                 ]),
-                "has_new_messages": .Bool(false),
-                "is_archived": .Bool(false),
-                "last_message": .Dictionary([
-                    "created_at": .String("2016-03-08T01:22:27.000Z"),
-                    "body": .String("Best munch ever"),
-                    "member": .Dictionary([
-                        "id": .String("fake-member-7"),
-                        "nickname": .String("JohnBaku"),
+                "has_new_messages": .bool(false),
+                "is_archived": .bool(false),
+                "last_message": .dictionary([
+                    "created_at": .string("2016-03-08T01:22:27.000Z"),
+                    "body": .string("Best munch ever"),
+                    "member": .dictionary([
+                        "id": .string("fake-member-7"),
+                        "nickname": .string("JohnBaku"),
                     ])
                 ])
             ]),
             
-            .Dictionary([ // 8
-                "id": .String("fake-convo-8"),
-                "updated_at": .String("2016-03-02T01:22:27.000Z"),
-                "member": .Dictionary([
-                    "id": .String("fake-member-8"),
-                    "nickname": .String("BiggleWiggleWiggle"),
-                    "meta_line": .String("19 CEO"),
-                    "avatar": .Dictionary([
+            .dictionary([ // 8
+                "id": .string("fake-convo-8"),
+                "updated_at": .string("2016-03-02T01:22:27.000Z"),
+                "member": .dictionary([
+                    "id": .string("fake-member-8"),
+                    "nickname": .string("BiggleWiggleWiggle"),
+                    "meta_line": .string("19 CEO"),
+                    "avatar": .dictionary([
                         "status": "sfw",
-                        "variants": .Dictionary(["medium": "https://flpics0.a.ssl.fastly.net/0/1/0004c0a3-562e-7bf7-780e-6903293438a0_110.jpg"])
+                        "variants": .dictionary(["medium": "https://flpics0.a.ssl.fastly.net/0/1/0004c0a3-562e-7bf7-780e-6903293438a0_110.jpg"])
                     ])
                 ]),
-                "has_new_messages": .Bool(false),
-                "is_archived": .Bool(false),
-                "last_message": .Dictionary([
-                    "created_at": .String("2016-03-02T01:22:27.000Z"),
-                    "body": .String("See ya"),
-                    "member": .Dictionary([
-                        "id": .String("fake-member-8"),
-                        "nickname": .String("BiggleWiggleWiggle"),
+                "has_new_messages": .bool(false),
+                "is_archived": .bool(false),
+                "last_message": .dictionary([
+                    "created_at": .string("2016-03-02T01:22:27.000Z"),
+                    "body": .string("See ya"),
+                    "member": .dictionary([
+                        "id": .string("fake-member-8"),
+                        "nickname": .string("BiggleWiggleWiggle"),
                     ])
                 ])
             ])

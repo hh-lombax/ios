@@ -34,7 +34,7 @@ extension UIColor {
     }
     
     public class func outgoingMessageBGColor() -> UIColor {
-        return UIColor.blackColor()
+        return UIColor.black
     }
     
     public class func messageTextColor() -> UIColor {

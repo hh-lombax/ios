@@ -28,27 +28,33 @@ class LoginViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func login(sender: UIButton) {
-        sender.setTitle("Authorizing...", forState: .Normal)
+    @IBAction func login(_ sender: UIButton) {
+        sender.setTitle("Authorizing...", for: UIControlState())
         
         API.authorizeInContext(self,
-            onAuthorize: { parameters in self.didAuthorizeWith(parameters) },
-            onFailure: { error in self.didCancelOrFail(error) }
+            onAuthorize: { (parameters, error) -> Void in
+                if let params = parameters {
+                    self.didAuthorizeWith(params)
+                }
+                if let err = error {
+                    self.didCancelOrFail(err)
+                }
+            }
         )
     }
     
-    func didAuthorizeWith(parameters: OAuth2JSON) {
-        if let window = UIApplication.sharedApplication().delegate?.window! {
-            window.rootViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewControllerWithIdentifier("chatSplitView")
+    func didAuthorizeWith(_ parameters: OAuth2JSON) {
+        if let window = UIApplication.shared.delegate?.window! {
+            window.rootViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "chatSplitView")
         }
     }
     
-    func didCancelOrFail(error: ErrorType?) {
+    func didCancelOrFail(_ error: Error?) {
         if let error = error {
             print("Failed to auth with error: \(error)")
         }
         
-        loginButton.setTitle("Login with your FetLife account", forState: .Normal)
-        loginButton.enabled = true
+        loginButton.setTitle("Login with your FetLife account", for: UIControlState())
+        loginButton.isEnabled = true
     }
 }

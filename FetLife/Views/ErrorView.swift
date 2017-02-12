@@ -14,9 +14,9 @@ class ErrorView: UIView {
     
     lazy var stackView: UIStackView = {
         let stack = UIStackView()
-        stack.axis = .Vertical
-        stack.distribution = .FillProportionally
-        stack.alignment = .Center
+        stack.axis = .vertical
+        stack.distribution = .fillProportionally
+        stack.alignment = .center
         stack.spacing = 26.0
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
@@ -30,9 +30,9 @@ class ErrorView: UIView {
         let label = UILabel()
         label.text = "Houston, we have a problem!"
         label.textColor = UIColor.brownishGreyColor()
-        label.lineBreakMode = .ByWordWrapping
+        label.lineBreakMode = .byWordWrapping
         label.numberOfLines = 0
-        label.textAlignment = .Center
+        label.textAlignment = .center
         return label
     }()
     
@@ -56,12 +56,12 @@ class ErrorView: UIView {
         backgroundColor = UIColor.backgroundColor()
         translatesAutoresizingMaskIntoConstraints = false
         
-        stackView.snp_makeConstraints { make in
-            make.centerX.equalTo(snp_centerX)
+        stackView.snp.makeConstraints { make in
+            make.centerX.equalTo(snp.centerX)
             make.topMargin.equalTo(70.0)
         }
         
-        textLabel.snp_makeConstraints { make in
+        textLabel.snp.makeConstraints { make in
             make.width.lessThanOrEqualTo(248.0)
         }
     }
