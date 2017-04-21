@@ -56,14 +56,14 @@ class Conversation: Object, JSONDecodable {
         self.init()
         
         id = try json.getString(at: "id")
-        updatedAt = try dateStringToNSDate(json.getString(at: "updated_at"))!
+        updatedAt = try dateStringToDate(json.getString(at: "updated_at")) ?? Date()
         member = try json.decode(at: "member", type: Member.self)
         hasNewMessages = try json.getBool(at: "has_new_messages")
         isArchived = try json.getBool(at: "is_archived")
         
         if let lastMessage = json["last_message"] {
             lastMessageBody = try decodeHTML(lastMessage.getString(at: "body"))
-            lastMessageCreated = try dateStringToNSDate(lastMessage.getString(at: "created_at"))!
+            lastMessageCreated = try dateStringToDate(lastMessage.getString(at: "created_at"))? Date()
         }
     }
     
@@ -98,7 +98,7 @@ class Message: Object {
         
         id = try json.getString(at: "id")
         body = try decodeHTML(json.getString(at: "body"))
-        createdAt = try dateStringToNSDate(json.getString(at: "created_at"))!
+        createdAt = try dateStringToDate(json.getString(at: "created_at")) ?? Date()
         memberId = try json.getString(at: "member", "id")
         memberNickname = try json.getString(at: "member", "nickname")
         isNew = try json.getBool(at: "is_new")
@@ -107,8 +107,8 @@ class Message: Object {
 
 // MARK: - Util
 
-// Convert from a JSON format datastring to an NSDate instance.
-private func dateStringToNSDate(_ jsonString: String!) -> Date? {
+// Convert from a JSON format datastring to a Date instance.
+private func dateStringToDate(_ jsonString: String!) -> Date? {
     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
     return dateFormatter.date(from: jsonString)
 }
