@@ -21,60 +21,60 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ app: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         NetworkActivityIndicatorManager.shared.isEnabled = true
-        
+
         setupAppearance(app)
-        
+
         let config = Realm.Configuration(schemaVersion: 0)
-        
+
         Realm.Configuration.defaultConfiguration = config
-        
+
         let _ = try! Realm() // Get a realm instance early on to force migrations and configuration.
-        
+
         let splitViewController = self.window!.rootViewController as! UISplitViewController
         let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
         navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-        
+
         let storyboard = UIStoryboard.init(name: "Main", bundle: nil)
-        
+
         if API.isAuthorized() {
             self.window!.rootViewController = storyboard.instantiateInitialViewController()
         } else {
             self.window!.rootViewController = storyboard.instantiateViewController(withIdentifier: "loginView")
         }
-        
+
         Fabric.with([Crashlytics.self])
-        
+
         return true
     }
-    
+
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any]) -> Bool {
-        
+
         if "fetlifeapp" == url.scheme {
             print("Received redirect")
             API.sharedInstance.oauthSession.handleRedirectURL(url)
             return true
         }
-        
+
         return false
     }
-    
-    
+
+
     func setupAppearance(_ app: UIApplication) {
         app.statusBarStyle = UIStatusBarStyle.lightContent
-        
+
         UINavigationBar.appearance().tintColor = UIColor.brickColor()
         UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.brickColor()]
         UINavigationBar.appearance().barTintColor = UIColor.backgroundColor()
         UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().isTranslucent = false
-        
+
         UITableView.appearance().backgroundColor = UIColor.backgroundColor()
         UITableView.appearance(whenContainedInInstancesOf: [ConversationsViewController.self]).separatorColor = UIColor.borderColor()
         UITableView.appearance(whenContainedInInstancesOf: [MessagesTableViewController.self]).separatorColor = UIColor.backgroundColor()
         UITableViewCell.appearance().backgroundColor = UIColor.backgroundColor()
     }
-    
-    
+
+
 
     func applicationWillResignActive(_ app: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

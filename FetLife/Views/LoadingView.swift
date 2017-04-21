@@ -9,9 +9,9 @@
 import UIKit
 
 class LoadingView: UIView {
-    
+
     // MARK: - Properties
-    
+
     lazy var stackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
@@ -21,13 +21,13 @@ class LoadingView: UIView {
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
-    
+
     lazy var activityIndicatorView: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(activityIndicatorStyle:  UIActivityIndicatorViewStyle.whiteLarge)
         indicator.startAnimating()
         return indicator
     }()
-    
+
     lazy var textLabel: UILabel = {
         let label = UILabel()
         label.text = "Loading…"
@@ -37,37 +37,37 @@ class LoadingView: UIView {
         label.textAlignment = .center
         return label
     }()
-    
+
     // MARK: - Lifecycle
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupView()
     }
-    
+
     func setupView() {
         stackView.addArrangedSubview(activityIndicatorView)
         stackView.addArrangedSubview(textLabel)
-        
+
         addSubview(stackView)
-        
+
         backgroundColor = UIColor.backgroundColor()
         translatesAutoresizingMaskIntoConstraints = false
-        
+
         stackView.snp.makeConstraints { make in
             make.centerX.equalTo(snp.centerX)
             make.topMargin.equalTo(97.0)
         }
-        
+
         activityIndicatorView.snp.makeConstraints { make in
             make.size.equalTo(37.0)
         }
-        
+
         textLabel.snp.makeConstraints { make in
             make.width.lessThanOrEqualTo(248.0)
         }

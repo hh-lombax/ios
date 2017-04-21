@@ -17,28 +17,28 @@ import RealmSwift
 // MARK: - API Singleton
 
 final class API {
-    
+
     // Make this is a singleton, accessed through sharedInstance
     static let sharedInstance = API()
-    
+
     let baseURL: String
     let oauthSession: OAuth2CodeGrant
-    
+
     var memberId: String?
     var memberNickname: String?
-    
+
     class func isAuthorized() -> Bool {
         return sharedInstance.isAuthorized()
     }
-    
+
     class func currentMemberId() -> String? {
         return sharedInstance.memberId
     }
-    
+
     class func currentMemberNickname() -> String? {
         return sharedInstance.memberNickname
     }
-    
+
     class func authorizeInContext(_ context: AnyObject, onAuthorize: @escaping (_ parameters: OAuth2JSON?, _ error: Error?) -> Void) {
         guard isAuthorized() else {
 //            sharedInstance.oauthSession.authorize(callback: onAuthorize)
@@ -47,15 +47,15 @@ final class API {
             return
         }
     }
-    
+
     fileprivate init() {
         let info = Bundle.main.infoDictionary!
-        
+
         self.baseURL = info["FETAPI_BASE_URL"] as! String
-        
+
         let clientID = info["FETAPI_OAUTH_CLIENT_ID"] as! String
         let clientSecret = info["FETAPI_OAUTH_CLIENT_SECRET"] as! String
-        
+
         oauthSession = OAuth2CodeGrant(settings: [
             "client_id": clientID,
             "client_secret": clientSecret,
@@ -65,13 +65,13 @@ final class API {
             "redirect_uris": ["fetlifeapp://oauth/callback"],
             "verbose": true
         ] as OAuth2JSON)
-        
+
         oauthSession.authConfig.ui.useSafariView = false
-        
+
         if let accessToken = oauthSession.accessToken {
             do {
                 let jwt = try decode(jwt: accessToken)
-                
+
                 if let userDictionary = jwt.body["user"] as? Dictionary<String, Any> {
                     self.memberId = userDictionary["id"] as? String
                     self.memberNickname = userDictionary["nick"] as? String
@@ -81,65 +81,37 @@ final class API {
             }
         }
     }
-    
+
     func isAuthorized() -> Bool {
         return oauthSession.hasUnexpiredAccessToken()
     }
-    
+
     func loadConversations(_ completion: ((_ error: Error?) -> Void)?) {
         let parameters = ["limit": 100, "order": "-updated_at", "with_archived": true] as [String : Any]
         let url = "\(baseURL)/v2/me/conversations"
-        
+
         oauthSession.request(.get, url, parameters: parameters).responseData { response -> Void in
             switch response.result {
             case .success(let value):
                 do {
                     let json = try JSON(data: value).getArray()
-                    
+
                     if json.isEmpty {
                         completion?(nil)
                         return
                     }
-                    
+
                     let realm = try! Realm()
-                    
+
                     realm.beginWrite()
-                    
+
                     for c in json {
                         let conversation = try! Conversation.init(json: c)
                         realm.add(conversation, update: true)
                     }
-                    
+
                     try! realm.commitWrite()
-                    
-                    completion?(nil)
-                } catch(let error) {
-                    completion?(error)
-                }
-            case .failure(let error):
-                completion?(error)
-            }
-        }
-    }
-    
-    func archiveConversation(_ conversationId: String, completion: ((_ error: Error?) -> Void)?) {
-        let parameters = ["is_archived": true]
-        let url = "\(baseURL)/v2/me/conversations/\(conversationId)"
-        
-        oauthSession.request(.put, url, parameters: parameters).responseData { response -> Void in
-            switch response.result {
-            case .success(let value):
-                do {
-                    let json = try JSON(data: value)
-                    
-                    let conversation = try Conversation.init(json: json)
-                    
-                    let realm = try Realm()
-                    
-                    try realm.write {
-                        realm.add(conversation, update: true)
-                    }
-                    
+
                     completion?(nil)
                 } catch(let error) {
                     completion?(error)
@@ -150,7 +122,35 @@ final class API {
         }
     }
 
-    
+    func archiveConversation(_ conversationId: String, completion: ((_ error: Error?) -> Void)?) {
+        let parameters = ["is_archived": true]
+        let url = "\(baseURL)/v2/me/conversations/\(conversationId)"
+
+        oauthSession.request(.put, url, parameters: parameters).responseData { response -> Void in
+            switch response.result {
+            case .success(let value):
+                do {
+                    let json = try JSON(data: value)
+
+                    let conversation = try Conversation.init(json: json)
+
+                    let realm = try Realm()
+
+                    try realm.write {
+                        realm.add(conversation, update: true)
+                    }
+
+                    completion?(nil)
+                } catch(let error) {
+                    completion?(error)
+                }
+            case .failure(let error):
+                completion?(error)
+            }
+        }
+    }
+
+
     func loadMessages(_ conversationId: String, parameters extraParameters: Dictionary<String, Any> = [:], completion: ((_ error: Error?) -> Void)?) {
         let url = "\(baseURL)/v2/me/conversations/\(conversationId)/messages"
         var parameters: Dictionary<String, Any> = ["limit": 50 as Any]
@@ -158,30 +158,30 @@ final class API {
         for (k, v) in extraParameters {
             parameters.updateValue(v, forKey: k)
         }
-        
+
         oauthSession.request(.get, url, parameters: parameters).responseData { response in
             switch response.result {
             case .success(let value):
                 do {
                     let json = try JSON(data: value).getArray()
-                    
+
                     if json.isEmpty {
                         completion?(nil)
                         return
                     }
-                    
+
                     let realm = try! Realm()
-                    
+
                     realm.beginWrite()
-                    
+
                     for m in json {
                         let message = try! Message.init(json: m)
                         message.conversationId = conversationId
                         realm.add(message, update: true)
                     }
-                    
+
                     try! realm.commitWrite()
-                    
+
                     completion?(nil)
                 } catch(let error) {
                     completion?(error)
@@ -191,30 +191,30 @@ final class API {
             }
         }
     }
-    
+
     func createAndSendMessage(_ conversationId: String, messageBody: String) {
         let parameters = ["body": messageBody]
         let url = "\(baseURL)/v2/me/conversations/\(conversationId)/messages"
-        
+
         oauthSession.request(.post, url, parameters: parameters).responseData { response in
             switch response.result {
             case .success(let value):
                 do {
                     let json = try JSON(data: value)
-                    
+
                     let realm = try! Realm()
-                    
+
                     let conversation = realm.object(ofType: Conversation.self, forPrimaryKey: conversationId as AnyObject)
                     let message = try Message(json: json)
-                    
+
                     message.conversationId = conversationId
-                    
+
                     try! realm.write {
                         conversation?.lastMessageBody = message.body
                         conversation?.lastMessageCreated = message.createdAt
                         realm.add(message)
                     }
-                    
+
                 } catch(let error) {
                     print(error)
                 }
@@ -223,18 +223,18 @@ final class API {
             }
         }
     }
-    
+
     func markMessagesAsRead(_ conversationId: String, messageIds: [String]) {
         let parameters = ["ids": messageIds]
         let url = "\(baseURL)/v2/me/conversations/\(conversationId)/messages/read"
-        
+
         oauthSession.request(.put, url, parameters: parameters).responseData { response in
             switch response.result {
             case .success:
                 let realm = try! Realm()
-                
+
                 let conversation = realm.object(ofType: Conversation.self, forPrimaryKey: conversationId as AnyObject)
-                
+
                 try! realm.write {
                     conversation?.hasNewMessages = false
                 }
@@ -252,11 +252,11 @@ final class API {
         let storage = HTTPCookieStorage.shared
         storage.cookies?.forEach() { storage.deleteCookie($0) }
     }
-    
+
     // Extremely useful for making app store screenshots, keeping this around for now.
     func fakeConversations() -> JSON {
         return JSON.array([
-            
+
             .dictionary([ // 1
                 "id": .string("fake-convo-1"),
                 "updated_at": .string("2016-03-11T02:29:27.000Z"),
@@ -280,7 +280,7 @@ final class API {
                     ])
                 ])
             ]),
-            
+
             .dictionary([ // 2
                 "id": .string("fake-convo-2"),
                 "updated_at": .string("2016-03-11T02:22:27.000Z"),
@@ -304,7 +304,7 @@ final class API {
                     ])
                 ])
             ]),
-            
+
             .dictionary([ // 3
                 "id": .string("fake-convo-3"),
                 "updated_at": .string("2016-03-11T00:59:27.000Z"),
@@ -328,7 +328,7 @@ final class API {
                     ])
                 ])
             ]),
-            
+
             .dictionary([ // 4
                 "id": .string("fake-convo-4"),
                 "updated_at": .string("2016-03-11T00:22:27.000Z"),
@@ -352,9 +352,9 @@ final class API {
                     ])
                 ])
             ]),
-            
-            
-            
+
+
+
             .dictionary([ // 5
                 "id": .string("fake-convo-5"),
                 "updated_at": .string("2016-03-10T20:41:27.000Z"),
@@ -365,7 +365,7 @@ final class API {
                     "avatar": .dictionary([
                         "status": "sfw",
                         "variants": .dictionary(["medium": "https://flpics1.a.ssl.fastly.net/4634/4634686/000524af-28b0-c73d-d811-d67ae1b93019_110.jpg"])
-                        
+
                     ])
                 ]),
                 "has_new_messages": .bool(false),
@@ -379,7 +379,7 @@ final class API {
                     ])
                 ])
             ]),
-            
+
             .dictionary([ // 6
                 "id": .string("fake-convo-6"),
                 "updated_at": .string("2016-03-10T01:10:27.000Z"),
@@ -403,7 +403,7 @@ final class API {
                     ])
                 ])
             ]),
-            
+
             .dictionary([ // 7
                 "id": .string("fake-convo-7"),
                 "updated_at": .string("2016-03-08T01:22:27.000Z"),
@@ -427,7 +427,7 @@ final class API {
                     ])
                 ])
             ]),
-            
+
             .dictionary([ // 8
                 "id": .string("fake-convo-8"),
                 "updated_at": .string("2016-03-02T01:22:27.000Z"),

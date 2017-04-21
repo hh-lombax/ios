@@ -9,7 +9,7 @@
 import UIKit
 
 class MessagesTableViewCellIncoming: BaseMessagesTableViewCell {
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

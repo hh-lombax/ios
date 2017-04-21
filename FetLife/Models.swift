@@ -16,19 +16,19 @@ private let dateFormatter: DateFormatter = DateFormatter()
 
 class Member: Object, JSONDecodable {
     let defaultAvatarURL = "https://flassets.a.ssl.fastly.net/images/avatar_missing_200x200.gif"
-    
+
     dynamic var id = ""
     dynamic var nickname = ""
     dynamic var metaLine = ""
     dynamic var avatarURL = ""
-    
+
     override static func primaryKey() -> String? {
         return "id"
     }
-    
+
     required convenience init(json: JSON) throws {
         self.init()
-        
+
         id = try json.getString(at: "id")
         nickname = try json.getString(at: "nickname")
         metaLine = try json.getString(at: "meta_line")
@@ -44,33 +44,33 @@ class Conversation: Object, JSONDecodable {
     dynamic var member: Member?
     dynamic var hasNewMessages = false
     dynamic var isArchived = false
-    
+
     dynamic var lastMessageBody = ""
     dynamic var lastMessageCreated = Date()
-    
+
     override static func primaryKey() -> String? {
         return "id"
     }
 
     required convenience init(json: JSON) throws {
         self.init()
-        
+
         id = try json.getString(at: "id")
         updatedAt = try dateStringToDate(json.getString(at: "updated_at")) ?? Date()
         member = try json.decode(at: "member", type: Member.self)
         hasNewMessages = try json.getBool(at: "has_new_messages")
         isArchived = try json.getBool(at: "is_archived")
-        
+
         if let lastMessage = json["last_message"] {
             lastMessageBody = try decodeHTML(lastMessage.getString(at: "body"))
             lastMessageCreated = try dateStringToDate(lastMessage.getString(at: "created_at"))? Date()
         }
     }
-    
+
     func summary() -> String {
         return lastMessageBody
     }
-    
+
     func timeAgo() -> String {
         return (lastMessageCreated as NSDate).shortTimeAgoSinceNow()
     }
@@ -88,14 +88,14 @@ class Message: Object {
     dynamic var isNew = false
     dynamic var isSending = false
     dynamic var conversationId = ""
-    
+
     override static func primaryKey() -> String? {
         return "id"
     }
-    
+
     required convenience init(json: JSON) throws {
         self.init()
-        
+
         id = try json.getString(at: "id")
         body = try decodeHTML(json.getString(at: "body"))
         createdAt = try dateStringToDate(json.getString(at: "created_at")) ?? Date()
@@ -121,14 +121,14 @@ private func decodeHTML(_ htmlEncodedString: String) -> String {
         NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType as AnyObject,
         NSCharacterEncodingDocumentAttribute: NSNumber(value: String.Encoding.utf8.rawValue) as AnyObject
     ]
-    
+
     var attributedString:NSAttributedString?
-    
+
     do {
         attributedString = try NSAttributedString(data: encodedData, options: attributedOptions, documentAttributes: nil)
     } catch {
         print(error)
     }
-    
+
     return attributedString!.string
 }

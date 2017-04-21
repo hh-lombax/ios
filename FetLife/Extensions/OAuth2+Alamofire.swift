@@ -19,9 +19,9 @@ extension OAuth2 {
         headers: [String: String]? = nil)
         -> Alamofire.DataRequest
     {
-        
+
         var hdrs = headers ?? [:]
-        
+
         if let token = accessToken {
             hdrs["Authorization"] = "Bearer \(token)"
         }

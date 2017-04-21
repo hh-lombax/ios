@@ -14,40 +14,40 @@ struct Dispatch {
     static func asyncOnMainQueue(asyncBlock: @escaping ExecutionBlock) {
         executeAsynchronously(Queue.main, closure: asyncBlock)
     }
-    
+
     static func asyncOnUserInitiatedQueue(asyncBlock: @escaping ExecutionBlock) {
         executeAsynchronously(Queue.userInitiated, closure: asyncBlock)
     }
-    
+
     static func asyncOnUtilityQueue(asyncBlock: @escaping ExecutionBlock) {
         executeAsynchronously(Queue.utility, closure: asyncBlock)
     }
-    
+
     static func asyncOnBackgroundQueue(asyncBlock: @escaping ExecutionBlock) {
         executeAsynchronously(Queue.background, closure: asyncBlock)
     }
-    
+
     static func executeAsynchronously(_ serviceQueue: DispatchQueue, closure: @escaping ExecutionBlock) {
         serviceQueue.async(execute: closure)
     }
-    
+
     struct Queue {
         static var main: DispatchQueue {
             return DispatchQueue.main
         }
-        
+
         static var userInitiated: DispatchQueue {
             return getGlobalQueueById(qosLevel: DispatchQoS.userInitiated)
         }
-        
+
         static var utility: DispatchQueue {
             return getGlobalQueueById(qosLevel: DispatchQoS.utility)
         }
-        
+
         static var background: DispatchQueue {
             return getGlobalQueueById(qosLevel: DispatchQoS.background)
         }
-        
+
         static func getGlobalQueueById(qosLevel id: DispatchQoS) -> DispatchQueue {
             return DispatchQueue.global(qos: id.qosClass)
         }

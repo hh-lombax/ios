@@ -9,11 +9,11 @@
 import UIKit
 
 class BaseMessagesTableViewCell: UITableViewCell {
-    
+
     @IBOutlet weak var bodyLabel: UILabel!
     @IBOutlet weak var unreadMarkerView: UIView!
     @IBOutlet weak var messageContainerView: UIView!
-    
+
     var message: Message? = nil {
         didSet {
             if let message = message {

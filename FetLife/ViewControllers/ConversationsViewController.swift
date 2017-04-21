@@ -11,44 +11,44 @@ import StatefulViewController
 import RealmSwift
 
 class ConversationsViewController: UIViewController, StatefulViewController, UITableViewDataSource, UITableViewDelegate, UISplitViewControllerDelegate {
-    
+
     @IBOutlet var containerView: UIView!
     @IBOutlet weak var tableView: UITableView!
 
     var detailViewController: MessagesTableViewController?
     var refreshControl = UIRefreshControl()
-    
+
     let conversations: Results<Conversation> = try! Realm()
         .objects(Conversation.self)
         .filter("isArchived == false")
         .sorted(byKeyPath: "lastMessageCreated", ascending: false)
-    
+
     var notificationToken: NotificationToken? = nil
-    
+
     fileprivate var collapseDetailViewController = true
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupStateViews()
-        
+
         self.refreshControl.addTarget(self, action: #selector(ConversationsViewController.refresh(_:)), for: UIControlEvents.valueChanged)
-        
+
         self.splitViewController?.delegate = self
-        
+
         self.tableView?.delegate = self
         self.tableView?.dataSource = self
         self.tableView?.separatorInset = UIEdgeInsets.zero
         self.tableView?.addSubview(refreshControl)
-        
+
         if let split = self.splitViewController {
             let controllers = split.viewControllers
             self.detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? MessagesTableViewController
         }
-        
+
         notificationToken = conversations.addNotificationBlock({ [weak self] (changes: RealmCollectionChange) in
             guard let tableView = self?.tableView else { return }
-            
+
             switch changes {
             case .initial(let conversations):
                 if conversations.count > 0 {
@@ -69,23 +69,23 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
                 break
             }
         })
-        
+
         if conversations.isEmpty {
             self.startLoading()
         }
-        
+
         self.fetchConversations()
     }
-    
+
     deinit {
         notificationToken?.stop()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.setupInitialViewState()
     }
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail" {
             if let indexPath = self.tableView.indexPathForSelectedRow {
@@ -104,7 +104,7 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
     func refresh(_ refreshControl: UIRefreshControl) {
         fetchConversations()
     }
-    
+
     func fetchConversations() {
         Dispatch.asyncOnUserInitiatedQueue() {
             API.sharedInstance.loadConversations() { error in
@@ -113,15 +113,15 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
             }
         }
     }
-    
+
     func setupStateViews() {
         let noConvoView = NoConversationsView(frame: view.frame)
-        
+
         noConvoView.refreshAction = {
             self.startLoading()
             self.fetchConversations()
         }
-        
+
         self.emptyView = noConvoView
         self.loadingView = LoadingView(frame: view.frame)
         self.errorView = ErrorView(frame: view.frame)
@@ -134,57 +134,57 @@ class ConversationsViewController: UIViewController, StatefulViewController, UIT
     }
 
     // MARK: - StatefulViewController
-    
+
     func hasContent() -> Bool {
         return conversations.count > 0
     }
-    
+
     // MARK: - TableView Delegate & DateSource
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = "ConversationCell"
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! ConversationCell
-        
+
         let conversation = conversations[indexPath.row]
-        
+
         cell.conversation = conversation
-        
+
         if cell.responds(to: #selector(setter: UIView.preservesSuperviewLayoutMargins)) {
             cell.layoutMargins = UIEdgeInsets.zero
             cell.preservesSuperviewLayoutMargins = false
         }
-        
+
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return conversations.count
     }
-    
+
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         collapseDetailViewController = false
     }
-    
+
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         let archive = UITableViewRowAction(style: .default, title: "Archive") { action, index in
             let conversationToArchive = self.conversations[indexPath.row]
-            
+
             let realm = try! Realm()
-            
+
             try! realm.write {
                 conversationToArchive.isArchived = true
             }
-            
+
             API.sharedInstance.archiveConversation(conversationToArchive.id, completion: nil)
         }
-        
+
         archive.backgroundColor = UIColor.brickColor()
-        
+
         return [archive]
     }
-    
+
     // MARK: - SplitViewController Delegate
-    
+
     func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
         return collapseDetailViewController
     }
